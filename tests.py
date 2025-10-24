@@ -14,6 +14,11 @@ class TestContact(unittest.TestCase):
         self.assertEqual(contact.last_name, "Carmack")
         self.assertEqual(contact.get_full_name(), "John Carmack")
 
+    def test_name_normalization(self):
+        contact = Contact(first_name="    john", last_name="Carmack   ", phone_number="+39 329 3892918", email="john@test.com")
+
+        self.assertEqual(contact.first_name, "John")
+        self.assertEqual(contact.last_name, "Carmack")
 
 if __name__ == "__main__":
     unittest.main()

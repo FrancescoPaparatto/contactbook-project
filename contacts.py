@@ -24,6 +24,10 @@ class Contact:
     id: UUID = field(default_factory=uuid4)
     email: Optional[str] = None
 
+    def _normalize_name(self, name: str) -> str | None:
+        if name:
+            return name.strip().capitalize()
+
     def get_full_name(self):
         # TODO: understand if this method is necessary or if there is a better way to do it.
         if self.first_name and self.last_name:
@@ -34,6 +38,11 @@ class Contact:
         if self.email and not re.match(EMAIL_PATTERN, self.email):
                 raise ValueError("Invalid email format")
     
+        if self.first_name:
+            self.first_name = self._normalize_name(self.first_name)
+
+        if self.last_name:
+            self.last_name = self._normalize_name(self.last_name)
 
 
 if __name__ == "__main__":
