@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 
 # TODO: in the docs, specify that I have simplified email validation and not covered all possible use cases
 EMAIL_PATTERN = r"^[\w\.]+@([\w]+\.)+[\w]{2,3}$"
+PHONE_NUMBER_PATTERN = r"^(?:\+39\s?)?3\d{2}\s?\d{3}\s?\d{4}$"
 
 @dataclass
 class Contact: 
@@ -37,12 +38,16 @@ class Contact:
         # TODO: understand if there is a way to handle this better
         if self.email and not re.match(EMAIL_PATTERN, self.email):
                 raise ValueError("Invalid email format")
+
+        if not re.match(PHONE_NUMBER_PATTERN, self.phone_number):
+            raise ValueError("Invalid phone number")
     
         if self.first_name:
             self.first_name = self._normalize_name(self.first_name)
 
         if self.last_name:
             self.last_name = self._normalize_name(self.last_name)
+
 
 
 if __name__ == "__main__":
