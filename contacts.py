@@ -26,9 +26,9 @@ PREFIX = "+39"
 
 @dataclass
 class Contact:
+    first_name: str 
+    last_name: str
     phone_number: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
     id: UUID = field(default_factory=uuid4)
     email: Optional[str] = None
 
@@ -50,22 +50,17 @@ class Contact:
 
         return "".join(phone_number_parts)
 
-    def get_full_name(self) -> str | None:
-        # TODO: the full name should be created only after normalization
-        # TODO: if something is missed, I can't create the full name so I should only to use one field and in the list all, I should sort contacts so I need to understand components (I mean: lambda r: r[1] (first last_name), r[0] (then first)) but what happens if the user is saved only with one
-        if self.first_name and self.last_name:
-            return f"{self.first_name.capitalize()} {self.last_name.capitalize()}"
+    def get_full_name(self) -> str:
+        return f"{self.first_name.capitalize()} {self.last_name.capitalize()}"
 
     def __post_init__(self) -> None:
-        # TODO: understand if there is a way to handle this better
-        if not self.first_name and not self.last_name:
-            raise MissingRequiredFieldError("Provide at least first or last name")
-        if self.first_name:
-            self.first_name = self._normalize_name(self.first_name)
+        # TODO: if the user don't add first or last name, raise an error saying that he should provide them. 
+        # TODO: understand if this should be handled here
+        if not self.first_name or not self.last_name:
+            raise MissingRequiredFieldError("This field is required, please provide it")
 
-        if self.last_name:
-            self.last_name = self._normalize_name(self.last_name)
-
+        self.first_name = self._normalize_name(self.first_name)
+        self.last_name = self._normalize_name(self.last_name)
         self.phone_number = self._normalize_phone_number(self.phone_number)
 
         if self.email and not re.match(EMAIL_PATTERN, self.email):
@@ -89,4 +84,5 @@ if __name__ == "__main__":
 
     else:
         print(elon)
-        print(elon.last_name)
+        print(elon.get_full_name())
+

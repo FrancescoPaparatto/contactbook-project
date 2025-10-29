@@ -22,9 +22,15 @@ class TestContact(unittest.TestCase):
 
     def test_invalid_contact(self):
         with self.assertRaises(MissingRequiredFieldError):
-            contact = Contact(
-                first_name="",
+            elon = Contact(
+                first_name="Elon",
                 last_name="",
+                phone_number="+39 329 3892918",
+                email="elon@test.com",
+            )
+            john = Contact(
+                first_name="",
+                last_name="Carmack",
                 phone_number="+39 329 3892918",
                 email="john@test.com",
             )

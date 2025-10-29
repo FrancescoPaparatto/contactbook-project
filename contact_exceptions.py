@@ -8,7 +8,8 @@ class ContactError(Exception):
     # this is the root class of my domain exceptions
     pass
 
-class ContactValidationError(ContactError, ValueError):
+
+class ContactValidationError(ContactError):
     # This is about fields error, in this case orchestrator reprompts specific fields
     pass
 
@@ -30,6 +31,6 @@ class DuplicateContactError(ContactError):
     pass
 
 
-class NotFoundError(ContactError):
+class ContactNotFoundError(ContactError):
     # edit/delete target missing
     pass

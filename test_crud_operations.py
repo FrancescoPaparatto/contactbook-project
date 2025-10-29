@@ -1,6 +1,7 @@
 # TODO: ADD TYPE HINTS FOR EACH FUNCTION
 
 import unittest
+from contact_exceptions import DuplicateContactError
 from contacts import Contact
 from addressbook import AddressBook
 
@@ -24,11 +25,9 @@ class TestAddressBook(unittest.TestCase):
         # Maybe this test case could be eliminated but leave it for now
         self.assertIsInstance(self.contact, Contact)
         self.assertIn(self.contact, self.addressbook.contacts.values())
+        # check if this function goes here or if it's necessary a different test for second indexes
+        self.assertIn(self.contact.phone_number, self.addressbook._phone_idx)
 
-    def test_exist(self):
-        self.addressbook.add_contact(self.contact)
-        self.assertTrue(self.addressbook.exists(self.contact))
 
 if __name__ == "__main__":
     unittest.main()
-
