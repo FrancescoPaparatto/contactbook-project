@@ -3,30 +3,29 @@
 # Notes about production code
 # - in production don't show contact_exceptions.Error but handle in a better way
 
-
 class ContactError(Exception):
-    # this is the root class of my domain exceptions
-    ...
-
+    """Base class for ContactEase domain errors."""
 
 class ContactValidationError(ContactError):
-    # This is about fields error, in this case orchestrator reprompts specific fields
-    ...
+    """Input failed validation (names/phone/email)."""
 
+class InvalidPhoneError(ContactValidationError):
+    """Phone format invalid."""
 
-class InvalidEmailError(ContactValidationError): ...
+class InvalidEmailError(ContactValidationError):
+    """Email format invalid."""
 
-
-class InvalidPhoneError(ContactValidationError): ...
-
-
-class MissingRequiredFieldError(ContactValidationError): ...
-
+class MissingRequiredFieldError(ContactValidationError):
+    """A required field is missing or empty."""
 
 class DuplicateContactError(ContactError):
-    # this block add/edit and reprompt
-    ...
+    """Phone or email already used by another contact."""
 
 class ContactNotFoundError(ContactError):
-    # edit/delete target missing
-    ...
+    """Contact was not found."""
+
+class StorageError(Exception):
+    """Generic persistence failure."""
+
+class FileCorruptionError(StorageError):
+    """Loaded file is malformed or schema is invalid."""
