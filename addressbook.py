@@ -28,6 +28,7 @@ class AddressBook:
         return contact
 
     def delete_contact(self, contact: Contact) -> None:
+        # TODO: understand how to retrieve a contact withoud using the id
         deleted_contact = self.contacts.pop(contact.id, None)
 
         if deleted_contact is None:
@@ -73,17 +74,24 @@ class AddressBook:
             )
         ]
 
-    def search_contact(self, search_term: str) -> List[Contact]:
-        # TODO: check this function
-        # alternatives: raise ContactNotFound here or raising it in the Orchestrator
-        return [
-            contact
-            for contact in self.contacts.values()
-            if search_term.lower() in contact.first_name.lower()
-            or search_term in contact.last_name.lower()
-        ]
+    def search_contact(self, query: str) -> List[Contact]:
+        normalized_query = query.strip().lower()
 
-    # I created two helper functions for simplify the processes of other functions: check duplicate and replace
+        contacts_found = []
+        # The user can search contact by first or last name typing them entirely or typing  sub-string
+        for contact in self.contacts.values():
+            if (
+                normalized_query in contact.first_name.lower()
+                or normalized_query in contact.last_name.lower()
+            ):
+                contacts_found.append(contact)
+
+        return sorted(
+            contacts_found,
+            key=lambda contact: (contact.last_name, contact.first_name, contact.id),
+        )
+
+    # Helper functions for other methods in this class
     def _check_duplicate_contact(
         self, contact: Contact, exclude_id: Optional[str] = None
     ) -> None:
@@ -111,3 +119,9 @@ class AddressBook:
             if new_contact.email:
                 self._email_idx[new_contact.email] = new_contact.id
         return new_contact
+
+    def get_contact(self, contact: Contact) -> Contact:
+        if contact not in self.contacts.values():
+            raise ContactNotFoundError("Contact not found.")
+
+        return contact
