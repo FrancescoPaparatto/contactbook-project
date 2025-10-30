@@ -1,47 +1,79 @@
+from typing import Dict, List, Optional
 from contacts import Contact
-from contact_exceptions import DuplicateContactError
+from contact_exceptions import DuplicateContactError, ContactNotFoundError
 
 
 class AddressBook:
     def __init__(self):
-        self.contacts = {}
-        # dictionary that stores phone_number -> id as second indexes
-        # mapping phone -> id for fast searching if a contact exist because the invariant is same number = same contact
-        self._phone_idx = {}
+        self.contacts: Dict[str, Contact] = {}
+        # Dictionaries created for duplicates check in order to search faster
+        self._phone_idx: Dict[str, str] = {}  # maps phone -> id
+        self._email_idx: Dict[str, str] = {}  # maps email -> id
 
-    def add_contact(self, contact: Contact) -> None:
-        # TODO: understand if the check isinstance is ok here instead of doing it in the orchestrator and also if is necessary since I checked with type hint
+        # Flag used to keep track of the changes
+        self.is_changed = False
 
-        # I think I should assume that this class will receive a valid Contact, the check should be done in the orchestrator, so don't include checks about isisntance
-        if self.exists(contact):
-            raise DuplicateContactError("Contact already exist")
+    def add_contact(self, contact: Contact) -> Contact:
+        self._check_duplicate_contact(contact)
 
         self.contacts[contact.id] = contact
         self._phone_idx[contact.phone_number] = contact.id
 
+        if contact.email:
+            self._email_idx[contact.email] = contact.id
+
+        self.is_changed = True
+
+        # return the contact object in order to make easier to show the user changes
+        return contact
+
     def delete_contact(self, contact: Contact) -> None:
-        if self.exists(contact):
-            del self.contacts[contact.id]
-            del self._phone_idx[contact.phone_number]
+        deleted_contact = self.contacts.pop(contact.id, None)
 
-        # I need to adjust this function both here and in the orchestrator
+        if deleted_contact is None:
+            raise ContactNotFoundError("Contact not found.")
 
-    def update_contact(self, contact: Contact):
-        # here I need to understand the logic better because I have to create another object. It's not responsibility of this function to use the search function, this function should only replace the object in the self.contacts dict
-        # in the orchestrator I have to create something that handles all, the thingsa and in the ui I need to ask for confirmation
-        # basically the logic behind is to replace the object 
-        # user select the option, user reprompt the fields, user decide to save
-        # basically I can use the add function and delete function and replace the object completely 
-        ...
+        # Remove it also from second indexes dictionaries
+        self._phone_idx.pop(contact.phone_number, None)
 
+        if contact.email:
+            self._email_idx.pop(contact.email, None)
 
-    def list_all_contacts(self) -> list[Contact]:
-        # TODO: understand if checks like if self.contacts and eventually raising error have to be done here, do the same for search contact
-        # TODO: check this function
-        # TODO: sort contacts before returning the list, options (DONE) next TODO: understand if the sorting should happen here and where handling errors
-        return [contact for contact in sorted(self.contacts.values(), key= lambda contact: contact.last_name)]
+        self.is_changed = True
 
-    def search_contact(self, search_term: str) -> list[Contact]:
+    def update_contact(
+        self, contact_to_update: Contact, updated_contact: Contact
+    ) -> Contact:
+        # TODO: check this function better
+
+        if contact_to_update.id not in self.contacts:
+            raise ContactNotFoundError("Contact not found.")
+
+        new_contact = Contact(
+            id=contact_to_update.id,
+            first_name=updated_contact.first_name,
+            last_name=updated_contact.last_name,
+            phone_number=updated_contact.phone_number,
+            email=updated_contact.email,
+        )
+
+        self._check_duplicate_contact(new_contact, exclude_id=contact_to_update.id)
+        self._replace_contact(contact_to_update, new_contact)
+        self.is_changed = True
+
+        return new_contact
+
+    def list_all_contacts(self) -> List[Contact]:
+        return [
+            contact
+            for contact in sorted(
+                # sort first for last name, then for first name and then for id
+                self.contacts.values(),
+                key=lambda contact: (contact.last_name, contact.first_name, contact.id),
+            )
+        ]
+
+    def search_contact(self, search_term: str) -> List[Contact]:
         # TODO: check this function
         # alternatives: raise ContactNotFound here or raising it in the Orchestrator
         return [
@@ -51,54 +83,31 @@ class AddressBook:
             or search_term in contact.last_name.lower()
         ]
 
-    # before submitting, try to create another function that is the same but with different implementation and profile it, in the documentation write a python cell to compare those two function and demonstrate what is the most efficient and why.
-    def exists(self, contact: Contact) -> bool:
-        if not self._phone_idx:
-            return False
+    # I created two helper functions for simplify the processes of other functions: check duplicate and replace
+    def _check_duplicate_contact(
+        self, contact: Contact, exclude_id: Optional[str] = None
+    ) -> None:
+        id = self._phone_idx.get(contact.phone_number)
 
-        return contact.phone_number in self._phone_idx
+        if id is not None and id != exclude_id:
+            raise DuplicateContactError("Phone number already used by another contact")
 
-        # TODO: Understand if NotFoundError should be raised in this function or in other function. I mean, I could do: if not exists: raise NotFound..
+        if contact.email:
+            id = self._email_idx.get(contact.email)
 
-        # I need to define some rules for existence, that's because even if two contats have the same data, they don't result equals because the id is different
+            if id is not None and id != exclude_id:
+                raise DuplicateContactError("Email already used by another contact")
 
-        # TODO: Need to define existence logic
-        # Possible approach: define __eq__ and __hash__ inside the contact class and use it for comparison so id are different in case of contacts that have the same name but different data
+    def _replace_contact(self, old_contact: Contact, new_contact: Contact) -> Contact:
+        self.contacts[new_contact.id] = new_contact
+        if new_contact.phone_number != old_contact.phone_number:
+            self._phone_idx.pop(old_contact.phone_number, None)
+            self._phone_idx[new_contact.phone_number] = new_contact.id
 
+        if (old_contact.email or None) != (new_contact.email or None):
+            if old_contact.email:
+                self._email_idx.pop(old_contact.email, None)
 
-if __name__ == "__main__":
-    addressbook = AddressBook()
-    john = Contact(
-        first_name="John",
-        last_name="Carmack",
-        phone_number="+39 329 3892918",
-        email="john@testcrud.com",
-    )
-    elon = Contact(
-        first_name="Elon ",
-        last_name="Musk",
-        phone_number="+39 329 3892919",
-        email="elon@testcrud.com",
-    )
-    steven = Contact(
-        first_name="Steven",
-        last_name="Lott",
-        phone_number="+39 329 3892919",
-        email="steven@testcrud.com",
-    )
-
-    peter = Contact(
-        first_name="Peter",
-        last_name="Parker",
-        phone_number="+39 339 3892919",
-        email="steven@testcrud.com",
-    )
-
-    addressbook.add_contact(john)
-    addressbook.add_contact(elon)
-    addressbook.add_contact(peter)
-
-    contacts = addressbook.list_all_contacts()
-    for contact in contacts:
-        print(f"{contact.first_name} {contact.last_name}: {contact.phone_number}")
-
+            if new_contact.email:
+                self._email_idx[new_contact.email] = new_contact.id
+        return new_contact

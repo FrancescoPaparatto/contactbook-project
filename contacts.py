@@ -83,9 +83,9 @@ class Contact:
     @staticmethod
     def from_dict(d: dict) -> "Contact":
         return Contact(
-            first_name=d.get("first_name"),
-            last_name=d.get("last_name"), 
-            phone_number=d.get("phone"), 
+            first_name=d["first_name"],
+            last_name=d["last_name"],
+            phone_number=d["phone"],
             email=d.get("email")
         )
 
