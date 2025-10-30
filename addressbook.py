@@ -26,21 +26,24 @@ class AddressBook:
 
         # I need to adjust this function both here and in the orchestrator
 
-    def update_contact(self):
+    def update_contact(self, contact: Contact):
         # here I need to understand the logic better because I have to create another object. It's not responsibility of this function to use the search function, this function should only replace the object in the self.contacts dict
         # in the orchestrator I have to create something that handles all, the thingsa and in the ui I need to ask for confirmation
-        pass
+        # basically the logic behind is to replace the object 
+        # user select the option, user reprompt the fields, user decide to save
+        # basically I can use the add function and delete function and replace the object completely 
+        ...
+
 
     def list_all_contacts(self) -> list[Contact]:
         # TODO: understand if checks like if self.contacts and eventually raising error have to be done here, do the same for search contact
         # TODO: check this function
-        # TODO: sort contacts before returning the list, options
-        #   - use __lt__ methods in Contact class
-        #   - understand how to use sorted in this context
-        return [contact for contact in self.contacts.values()]
+        # TODO: sort contacts before returning the list, options (DONE) next TODO: understand if the sorting should happen here and where handling errors
+        return [contact for contact in sorted(self.contacts.values(), key= lambda contact: contact.last_name)]
 
     def search_contact(self, search_term: str) -> list[Contact]:
         # TODO: check this function
+        # alternatives: raise ContactNotFound here or raising it in the Orchestrator
         return [
             contact
             for contact in self.contacts.values()
@@ -95,19 +98,7 @@ if __name__ == "__main__":
     addressbook.add_contact(elon)
     addressbook.add_contact(peter)
 
-    print("================================")
-    print("Before removing Elon")
-    contacts = addressbook.list_all_contacts()
-    for contact in contacts:
-        print(f"{contact.first_name} {contact.last_name}: {contact.phone_number}")
-    print(addressbook._phone_idx.keys())
-
-    addressbook.delete_contact(elon)
-    print("================================")
-    print("After removing Elon")
-
     contacts = addressbook.list_all_contacts()
     for contact in contacts:
         print(f"{contact.first_name} {contact.last_name}: {contact.phone_number}")
 
-    print(addressbook._phone_idx.keys())

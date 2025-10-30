@@ -6,31 +6,27 @@
 
 class ContactError(Exception):
     # this is the root class of my domain exceptions
-    pass
+    ...
 
 
 class ContactValidationError(ContactError):
     # This is about fields error, in this case orchestrator reprompts specific fields
-    pass
+    ...
 
 
-class InvalidEmailError(ContactValidationError):
-    pass
+class InvalidEmailError(ContactValidationError): ...
 
 
-class InvalidPhoneError(ContactValidationError):
-    pass
+class InvalidPhoneError(ContactValidationError): ...
 
 
-class MissingRequiredFieldError(ContactValidationError):
-    pass
+class MissingRequiredFieldError(ContactValidationError): ...
 
 
 class DuplicateContactError(ContactError):
     # this block add/edit and reprompt
-    pass
-
+    ...
 
 class ContactNotFoundError(ContactError):
     # edit/delete target missing
-    pass
+    ...

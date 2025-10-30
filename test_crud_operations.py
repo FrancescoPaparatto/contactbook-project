@@ -1,9 +1,10 @@
 # TODO: ADD TYPE HINTS FOR EACH FUNCTION
+# TODO: check each test and understand if all make sense and if I tested also edge cases and something like that
 
 import unittest
-from contact_exceptions import DuplicateContactError
 from contacts import Contact
 from addressbook import AddressBook
+from contact_exceptions import ContactNotFoundError, DuplicateContactError
 
 
 class TestAddressBook(unittest.TestCase):
@@ -19,14 +20,27 @@ class TestAddressBook(unittest.TestCase):
             email="john@testcrud.com",
         )
 
-    def test_add_contact(self):
         self.addressbook.add_contact(self.contact)
 
+    def test_add_contact(self):
         # Maybe this test case could be eliminated but leave it for now
         self.assertIsInstance(self.contact, Contact)
         self.assertIn(self.contact, self.addressbook.contacts.values())
         # check if this function goes here or if it's necessary a different test for second indexes
         self.assertIn(self.contact.phone_number, self.addressbook._phone_idx)
+
+    def test_delete_contact(self):
+        # first assert that contact has been added
+        self.assertIn(self.contact, self.addressbook.contacts.values())
+
+        self.addressbook.delete_contact(self.contact)
+        self.assertDictEqual(self.addressbook.contacts, {})
+
+    def test_exists(self): 
+        self.assertIn(self.contact.phone_number, self.addressbook._phone_idx)
+
+
+    def test_search_contact(self): ...
 
 
 if __name__ == "__main__":
