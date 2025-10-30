@@ -28,7 +28,6 @@ class AddressBook:
         return contact
 
     def delete_contact(self, contact: Contact) -> None:
-        # TODO: understand how to retrieve a contact withoud using the id
         deleted_contact = self.contacts.pop(contact.id, None)
 
         if deleted_contact is None:
@@ -37,6 +36,7 @@ class AddressBook:
         # Remove it also from second indexes dictionaries
         self._phone_idx.pop(contact.phone_number, None)
 
+        # TODO: UNDERSTAND the case of a contact withoud email of a modified contact
         if contact.email:
             self._email_idx.pop(contact.email, None)
 
@@ -45,13 +45,14 @@ class AddressBook:
     def update_contact(
         self, contact_to_update: Contact, updated_contact: Contact
     ) -> Contact:
-        # TODO: check this function better
+        # id stays consistent
+        id = contact_to_update.id
 
         if contact_to_update.id not in self.contacts:
             raise ContactNotFoundError("Contact not found.")
 
         new_contact = Contact(
-            id=contact_to_update.id,
+            id=id,
             first_name=updated_contact.first_name,
             last_name=updated_contact.last_name,
             phone_number=updated_contact.phone_number,
@@ -108,6 +109,7 @@ class AddressBook:
 
     def _replace_contact(self, old_contact: Contact, new_contact: Contact) -> Contact:
         self.contacts[new_contact.id] = new_contact
+
         if new_contact.phone_number != old_contact.phone_number:
             self._phone_idx.pop(old_contact.phone_number, None)
             self._phone_idx[new_contact.phone_number] = new_contact.id
@@ -125,3 +127,5 @@ class AddressBook:
             raise ContactNotFoundError("Contact not found.")
 
         return contact
+
+
