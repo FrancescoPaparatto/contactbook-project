@@ -36,7 +36,7 @@ class AddressBook:
         # Remove it also from second indexes dictionaries
         self._phone_idx.pop(contact.phone_number, None)
 
-        # TODO: UNDERSTAND the case of a contact withoud email of a modified contact
+        # TODO: UNDERSTAND the case of a contact without email of a modified contact
         if contact.email:
             self._email_idx.pop(contact.email, None)
 
@@ -87,6 +87,9 @@ class AddressBook:
             ):
                 contacts_found.append(contact)
 
+        if not contacts_found:
+            raise ContactNotFoundError("No contacts found")
+
         return sorted(
             contacts_found,
             key=lambda contact: (contact.last_name, contact.first_name, contact.id),
@@ -122,10 +125,9 @@ class AddressBook:
                 self._email_idx[new_contact.email] = new_contact.id
         return new_contact
 
+    # TODO: understand if I need this function, else eliminate it
     def get_contact(self, contact: Contact) -> Contact:
         if contact not in self.contacts.values():
             raise ContactNotFoundError("Contact not found.")
 
         return contact
-
-

@@ -33,6 +33,7 @@ class Contact:
     email: Optional[str] = None
 
     def _normalize_name(self, name: str) -> str:
+        # TODO: handle last_name as McDonalds, Da Vinci...
         return name.strip().capitalize()
 
     def _validate_phone_number(self, phone_number: str) -> str:

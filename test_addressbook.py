@@ -1,7 +1,7 @@
 import unittest
-import addressbook
 from contacts import Contact
 from addressbook import AddressBook
+from contact_exceptions import DuplicateContactError, ContactNotFoundError
 
 
 # In this class I will test CRUD operations so I will assume that data format is correct (tested in test contact module)
@@ -52,6 +52,32 @@ class TestAddressBook(unittest.TestCase):
             self.addressbook.contacts[self.contact.id].email,
             "alberteinstein@newtest.com",
         )
+
+    def test_check_duplicate_phone(self):
+        self.addressbook.add_contact(self.contact)
+        self.assertIn(self.contact, self.addressbook.contacts.values())
+
+        new_contact = Contact(
+            first_name="Leonardo",
+            last_name="Da Vinci",
+            phone_number="+39 339 3842348",
+            email="leonardo@test.com",
+        )
+
+        with self.assertRaises(DuplicateContactError):
+            self.addressbook.add_contact(new_contact)
+
+    def test_search_contact(self):
+        self.addressbook.add_contact(self.contact)
+        self.assertIn(self.contact, self.addressbook.contacts.values())
+
+        self.assertEqual(self.addressbook.search_contact("Alb")[0].first_name, "Albert")
+        self.assertEqual(
+            self.addressbook.search_contact("einst")[0].first_name, "Albert"
+        )
+
+        with self.assertRaises(ContactNotFoundError):
+            self.addressbook.search_contact("leonardo")
 
 
 if __name__ == "__main__":

@@ -11,72 +11,73 @@ from contact_exceptions import (
 # TODO: correct errors name in the assertRaises functions after I complete the data validation and exceptions modules
 
 class TestContact(unittest.TestCase):
+
     def test_invalid_email(self):
         with self.assertRaises(InvalidEmailError):
             contact = Contact(
-                first_name="John",
-                last_name="Carmack",
+                first_name="Linus",
+                last_name="Torvalds",
                 phone_number="+39 329 3892918",
-                email="john@.com",
+                email="linus@.com",
             )
 
     def test_invalid_contact(self):
         with self.assertRaises(MissingRequiredFieldError):
-            elon = Contact(
-                first_name="Elon",
+            contact = Contact(
+                first_name="Steve",
                 last_name="",
                 phone_number="+39 329 3892918",
-                email="elon@test.com",
+                email="stevejobs@test.com",
             )
-            john = Contact(
+            contact = Contact(
                 first_name="",
                 last_name="Carmack",
                 phone_number="+39 329 3892918",
-                email="john@test.com",
+                email="johncarmack@test.com",
             )
 
     def test_valid_contact(self):
         contact = Contact(
-            first_name="John",
-            last_name="Carmack",
+            first_name="Alan",
+            last_name="Turing",
             phone_number="+39 329 3892918",
-            email="john@test.com",
+            email="alanturing@test.com",
         )
 
-        self.assertEqual(contact.first_name, "John")
-        self.assertEqual(contact.last_name, "Carmack")
-        self.assertEqual(contact.get_full_name(), "John Carmack")
+        self.assertEqual(contact.first_name, "Alan")
+        self.assertEqual(contact.last_name, "Turing")
+        self.assertEqual(contact.get_full_name(), "Alan Turing")
 
     def test_name_normalization(self):
         contact = Contact(
-            first_name="    john",
-            last_name="Carmack   ",
+            first_name="    elon",
+            last_name="musk   ",
             phone_number="+39 329 3892918",
-            email="john@test.com",
+            email="elonmusk@test.com",
         )
 
-        self.assertEqual(contact.first_name, "John")
-        self.assertEqual(contact.last_name, "Carmack")
+        self.assertEqual(contact.first_name, "Elon")
+        self.assertEqual(contact.last_name, "Musk")
 
     def test_phone_number_normalization(self):
-        john = Contact(
+        contact = Contact(
             first_name="John",
             last_name="Carmack",
             phone_number="+39 329 3892918",
             email="john@test.com",
         )
-        elon = Contact(
+        second_contact = Contact(
             first_name="Elon",
             last_name="Musk",
             phone_number="329 3892919",
             email="elon@test.com",
         )
 
-        self.assertEqual(john.phone_number, "+393293892918")
-        self.assertEqual(elon.phone_number, "+393293892919")
+        self.assertEqual(contact.phone_number, "+393293892918")
+        self.assertEqual(second_contact.phone_number, "+393293892919")
 
         with self.assertRaises(InvalidPhoneError):
-            pavel = Contact(
+            contact = Contact(
                 first_name="Pavel",
                 last_name="Durov",
                 phone_number="+39 329 389 291902934",
