@@ -1,14 +1,18 @@
 from typing import Dict, List, Optional
 from contacts import Contact
 from contact_exceptions import DuplicateContactError, ContactNotFoundError
+from storage import Storage
+
+# TODO: update test_addressbook.py because now addressbook accept storage object as argument
 
 
 class AddressBook:
-    def __init__(self):
+    def __init__(self, storage: Storage):
         self.contacts: Dict[str, Contact] = {}
         # Dictionaries created for duplicates check in order to search faster
         self._phone_idx: Dict[str, str] = {}  # maps phone -> id
         self._email_idx: Dict[str, str] = {}  # maps email -> id
+        self.storage: Storage = storage
 
         # Flag used to keep track of the changes
         self.is_changed = False
@@ -51,19 +55,11 @@ class AddressBook:
         if contact_to_update.id not in self.contacts:
             raise ContactNotFoundError("Contact not found.")
 
-        new_contact = Contact(
-            id=id,
-            first_name=updated_contact.first_name,
-            last_name=updated_contact.last_name,
-            phone_number=updated_contact.phone_number,
-            email=updated_contact.email,
-        )
-
-        self._check_duplicate_contact(new_contact, exclude_id=contact_to_update.id)
-        self._replace_contact(contact_to_update, new_contact)
+        self._check_duplicate_contact(updated_contact, exclude_id=contact_to_update.id)
+        self._replace_contact(contact_to_update, updated_contact)
         self.is_changed = True
 
-        return new_contact
+        return updated_contact
 
     def list_all_contacts(self) -> List[Contact]:
         return [
@@ -111,7 +107,7 @@ class AddressBook:
                 raise DuplicateContactError("Email already used by another contact")
 
     def _replace_contact(self, old_contact: Contact, new_contact: Contact) -> Contact:
-        self.contacts[new_contact.id] = new_contact
+        self.contacts[old_contact.id] = new_contact
 
         if new_contact.phone_number != old_contact.phone_number:
             self._phone_idx.pop(old_contact.phone_number, None)
@@ -123,6 +119,7 @@ class AddressBook:
 
             if new_contact.email:
                 self._email_idx[new_contact.email] = new_contact.id
+
         return new_contact
 
     # TODO: understand if I need this function, else eliminate it
@@ -131,3 +128,22 @@ class AddressBook:
             raise ContactNotFoundError("Contact not found.")
 
         return contact
+
+    def save(self, path: str):
+        # serialize data from json to a Dict[str, dict]
+        data = {contact.id: contact.to_dict() for contact in self.contacts.values()}
+
+        self.storage.save(data, path)
+        # if it fails, the storage will raise a StorageError
+        self.is_changed = False
+
+    def load(self, path: str):
+        contacts_loaded = self.storage.load(path)
+
+        self.contacts = {
+            id: Contact.from_dict(contact) for id, contact in contacts_loaded.items()
+        }
+
+        self.is_changed = False
+
+

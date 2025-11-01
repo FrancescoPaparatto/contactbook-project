@@ -1,4 +1,5 @@
 import unittest
+from storage import Storage, JsonStorage
 from contacts import Contact
 from addressbook import AddressBook
 from contact_exceptions import DuplicateContactError, ContactNotFoundError
@@ -7,7 +8,8 @@ from contact_exceptions import DuplicateContactError, ContactNotFoundError
 # In this class I will test CRUD operations so I will assume that data format is correct (tested in test contact module)
 class TestAddressBook(unittest.TestCase):
     def setUp(self):
-        self.addressbook = AddressBook()
+        self.storage = JsonStorage()
+        self.addressbook = AddressBook(self.storage)
         self.contact = Contact(
             first_name="Albert",
             last_name="Einstein",
@@ -52,6 +54,11 @@ class TestAddressBook(unittest.TestCase):
             self.addressbook.contacts[self.contact.id].email,
             "alberteinstein@newtest.com",
         )
+
+        # test if id stays consistent after update
+        # check if associated to the old id there is the contact updated 
+        # key id (self.contact.id) -> updated_contact: Contact 
+        self.assertIs(self.addressbook.contacts[self.contact.id], updated_contact)
 
     def test_check_duplicate_phone(self):
         self.addressbook.add_contact(self.contact)

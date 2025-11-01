@@ -29,6 +29,7 @@ class Contact:
     first_name: str 
     last_name: str
     phone_number: str
+    # TODO: understand why do i need lambda instead of using directly str()
     id: str = field(default_factory=lambda: str(uuid4()))
     email: Optional[str] = None
 
