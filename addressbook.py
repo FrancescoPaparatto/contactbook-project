@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 from contacts import Contact
 from contact_exceptions import DuplicateContactError, ContactNotFoundError
-from storage import Storage
+from storage import JsonStorage, Storage
 
 # TODO: update test_addressbook.py because now addressbook accept storage object as argument
 
@@ -53,6 +53,7 @@ class AddressBook:
         id = contact_to_update.id
 
         if contact_to_update.id not in self.contacts:
+            print(contact_to_update)
             raise ContactNotFoundError("Contact not found.")
 
         self._check_duplicate_contact(updated_contact, exclude_id=contact_to_update.id)
@@ -61,7 +62,7 @@ class AddressBook:
 
         return updated_contact
 
-    def list_all_contacts(self) -> List[Contact]:
+    def list_contacts(self) -> List[Contact]:
         return [
             contact
             for contact in sorted(
@@ -137,13 +138,31 @@ class AddressBook:
         # if it fails, the storage will raise a StorageError
         self.is_changed = False
 
+    # TODO: review this function and understand why it doesn't work
     def load(self, path: str):
         contacts_loaded = self.storage.load(path)
+
+        self.contacts.clear()
+        self._phone_idx.clear()
+        self._email_idx.clear()
 
         self.contacts = {
             id: Contact.from_dict(contact) for id, contact in contacts_loaded.items()
         }
 
+        self._phone_idx = {
+            contact.phone_number: contact.id for contact in self.contacts.values()
+        }
+
+        self._email_idx = {
+            contact.email: contact.id
+            for contact in self.contacts.values()
+            if contact.email
+        }
+
         self.is_changed = False
+
+    def __len__(self):
+        return len(self.contacts)
 
 
