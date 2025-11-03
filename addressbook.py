@@ -49,8 +49,6 @@ class AddressBook:
     def update_contact(
         self, contact_to_update: Contact, updated_contact: Contact
     ) -> Contact:
-        # id stays consistent
-        id = contact_to_update.id
 
         if contact_to_update.id not in self.contacts:
             print(contact_to_update)
