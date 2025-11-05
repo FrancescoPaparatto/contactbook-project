@@ -119,7 +119,6 @@ class AddressBook:
         # if it fails, the storage will raise a StorageError
         self.is_changed = False
 
-    # TODO: review this function and understand why it doesn't work
     def load(self, path: str):
         contacts_loaded = self.storage.load(path)
 

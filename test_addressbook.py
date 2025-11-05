@@ -86,6 +86,15 @@ class TestAddressBook(unittest.TestCase):
         with self.assertRaises(ContactNotFoundError):
             self.addressbook.search_contact("leonardo")
 
+    def test_save(self):
+    # In save function I think I should expect only the change in the flag and the path, even the fact that contact_to_dict works
+        self.addressbook.add_contact(self.contact)
+        self.assertIn(self.contact, self.addressbook.contacts.values())
+
+        path = "./contacts.json"
+        self.addressbook.save(path)
+        self.assertFalse(self.addressbook.is_changed)
+
 
 if __name__ == "__main__":
     unittest.main()

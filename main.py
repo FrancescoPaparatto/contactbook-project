@@ -1,3 +1,4 @@
+from _typeshed import FileDescriptor
 import sys
 from contacts import Contact
 from addressbook import AddressBook
@@ -44,6 +45,9 @@ exit: exit from the program.
                 addressbook.load(path)
                 print(f"Loaded {len(addressbook)} contacts from {path}.")
                 break
+
+            except FileCorruptionError as e:
+                print(f"Error: {e}")
 
             except StorageError as e:
                 print(f"Error: {e}")
