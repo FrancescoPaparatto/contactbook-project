@@ -10,8 +10,10 @@ from helpers import (
     get_contact,
 )
 from contact_exceptions import (
+    InvalidPhoneError,
+    InvalidEmailError,
     ContactValidationError,
-    DuplicateContactError, 
+    DuplicateContactError,
     ContactNotFoundError,
     StorageError,
     FileCorruptionError,
@@ -50,16 +52,16 @@ exit: exit from the program.
                 print(f"Error: {e}")
 
             except StorageError as e:
-
                 print(f"Error: {e}")
 
         elif cmd == "clear":
             if name == "nt":
                 system("cls")
-            else: 
+            else:
                 system("clear")
 
         elif cmd == "exit":
+            print("\nExiting from the contact book.")
             sys.exit()
 
         else:
@@ -116,13 +118,29 @@ exit: exit from the application
 
             print("\nAdd new contact data (leave blank to keep): ")
 
-            first_name = input("First name: ").title().strip() or contact_to_update.first_name
-            last_name = input("Last name: ").title().strip() or contact_to_update.last_name
-            phone_number = validate_phone_number(
-                input("Phone number: ").strip() or contact_to_update.phone_number
+            first_name = (
+                input("First name: ").title().strip() or contact_to_update.first_name
             )
-            email = validate_email(input("Email: ")) or (contact_to_update.email or None)
-            
+            last_name = (
+                input("Last name: ").title().strip() or contact_to_update.last_name
+            )
+
+            try:
+                phone_number = validate_phone_number(
+                    input("Phone number: ").strip() or contact_to_update.phone_number
+                )
+            except InvalidPhoneError as e:
+                print(e)
+                continue
+
+            try:
+                email = validate_email(input("Email: ")) or (
+                    contact_to_update.email or None
+                )
+
+            except InvalidEmailError as e:
+                print(e)
+                continue
 
             try:
                 updated_contact = Contact(
@@ -132,7 +150,9 @@ exit: exit from the application
                     email=email,
                 )
                 addressbook.update_contact(contact_to_update, updated_contact)
-                print(f"\nContact '{updated_contact.get_full_name()}' updated successfully.")
+                print(
+                    f"\nContact '{updated_contact.get_full_name()}' updated successfully."
+                )
 
             except ContactNotFoundError as e:
                 print(e)
@@ -171,7 +191,7 @@ exit: exit from the application
         elif cmd == "clear":
             if name == "nt":
                 system("cls")
-            else: 
+            else:
                 system("clear")
 
         elif cmd == "exit":
@@ -191,6 +211,7 @@ exit: exit from the application
                     addressbook.save(path)
                     print("\nChanges saved correctly.")
 
+            print("\nExiting from the contact book.")
             sys.exit()
 
         else:
