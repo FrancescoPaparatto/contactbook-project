@@ -1,5 +1,5 @@
-from _typeshed import FileDescriptor
 import sys
+from os import name, system
 from contacts import Contact
 from addressbook import AddressBook
 from storage import Storage, JsonStorage
@@ -28,6 +28,7 @@ def main():
 
 new: start a new address book.
 load: load from json file.
+clear: clear the screen
 exit: exit from the program.
 """)
 
@@ -50,7 +51,14 @@ exit: exit from the program.
                 print(f"Error: {e}")
 
             except StorageError as e:
+
                 print(f"Error: {e}")
+
+        elif cmd == "clear":
+            if name == "nt":
+                system("cls")
+            else: 
+                system("clear")
 
         elif cmd == "exit":
             sys.exit()
@@ -67,6 +75,7 @@ search: search a contact
 edit: edit a contact
 delete: delete a contact
 save: save the changes
+clear: clear the screen
 exit: exit from the application
 """)
         cmd = input("> ").strip().lower()
@@ -159,6 +168,12 @@ exit: exit from the application
             print(f"Saved to '{path}'.")
 
             break
+
+        elif cmd == "clear":
+            if name == "nt":
+                system("cls")
+            else: 
+                system("clear")
 
         elif cmd == "exit":
             if addressbook.is_changed:

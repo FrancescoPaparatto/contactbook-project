@@ -1,4 +1,5 @@
 import unittest
+import addressbook
 from storage import JsonStorage
 from contacts import Contact
 from addressbook import AddressBook
@@ -87,13 +88,14 @@ class TestAddressBook(unittest.TestCase):
             self.addressbook.search_contact("leonardo")
 
     def test_save(self):
-    # In save function I think I should expect only the change in the flag and the path, even the fact that contact_to_dict works
+        # TODO: testing this function will create a file and the phone number is not formatted in E.164 because this function only use the add_contact but not the validate_phone_number function that also format the number  
         self.addressbook.add_contact(self.contact)
         self.assertIn(self.contact, self.addressbook.contacts.values())
 
-        path = "./contacts.json"
+        path = "./fake_path.json"
         self.addressbook.save(path)
         self.assertFalse(self.addressbook.is_changed)
+        self.assertEqual(len(self.addressbook), 1)
 
 
 if __name__ == "__main__":
