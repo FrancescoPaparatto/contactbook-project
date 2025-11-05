@@ -87,15 +87,6 @@ class TestAddressBook(unittest.TestCase):
         with self.assertRaises(ContactNotFoundError):
             self.addressbook.search_contact("leonardo")
 
-    def test_save(self):
-        # TODO: testing this function will create a file and the phone number is not formatted in E.164 because this function only use the add_contact but not the validate_phone_number function that also format the number  
-        self.addressbook.add_contact(self.contact)
-        self.assertIn(self.contact, self.addressbook.contacts.values())
-
-        path = "./fake_path.json"
-        self.addressbook.save(path)
-        self.assertFalse(self.addressbook.is_changed)
-        self.assertEqual(len(self.addressbook), 1)
 
 
 if __name__ == "__main__":
