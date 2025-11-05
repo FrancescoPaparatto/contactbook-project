@@ -2,21 +2,28 @@ import sys
 from contacts import Contact
 from addressbook import AddressBook
 from storage import Storage, JsonStorage
-from helpers import prompt_contact_fields, render_contacts
+from helpers import (
+    prompt_contact_fields,
+    render_contacts,
+    get_contact,
+    validate_email,
+    validate_phone_number,
+)
 from contact_exceptions import (
     ContactValidationError,
-    DuplicateContactError,
+    DuplicateContactError, 
     ContactNotFoundError,
     StorageError,
     FileCorruptionError,
 )
+
 
 def main():
     storage: Storage = JsonStorage()
     addressbook: AddressBook = AddressBook(storage)
 
     while True:
-        print("""\n Starting menu commands: 
+        print("""\nStarting menu commands: 
 
 new: start a new address book.
 load: load from json file.
@@ -37,6 +44,7 @@ exit: exit from the program.
                 addressbook.load(path)
                 print(f"Loaded {len(addressbook)} contacts from {path}.")
                 break
+
             except StorageError as e:
                 print(f"Error: {e}")
 
@@ -64,6 +72,10 @@ exit: exit from the application
             try:
                 contact = Contact(**fields)
 
+            except DuplicateContactError as e:
+                print(e)
+                continue
+
             except ContactValidationError as e:
                 print(f"Validation Error: {e}")
                 continue
@@ -75,17 +87,75 @@ exit: exit from the application
             render_contacts(addressbook.list_contacts())
 
         elif cmd == "search":
-            ...
+            query = input("\nSearch contact: ")
+            contact_found = get_contact(query, addressbook)
+
+            render_contacts([contact_found])
+
         elif cmd == "edit":
-            ...
+            query = input("Select the contact you want to edit: ")
+
+            contact_to_update = get_contact(query, addressbook)
+            print("\nCurrent contact informations:")
+            print(f"First: {contact_to_update.first_name}")
+            print(f"Last:  {contact_to_update.last_name}")
+            print(f"Phone: {contact_to_update.phone_number}")
+            print(f"Email: {contact_to_update.email or ''}")
+
+            print("\nAdd new contact data (leave blank to keep): ")
+
+            first_name = input("First name: ").title().strip() or contact_to_update.first_name
+            last_name = input("Last name: ").title().strip() or contact_to_update.last_name
+            phone_number = validate_phone_number(
+                input("Phone number: ").strip() or contact_to_update.phone_number
+            )
+            email = validate_email(input("Email: ")) or (contact_to_update.email or None)
+            
+
+            try:
+                updated_contact = Contact(
+                    first_name=first_name,
+                    last_name=last_name,
+                    phone_number=phone_number,
+                    email=email,
+                )
+                addressbook.update_contact(contact_to_update, updated_contact)
+                print(f"\nContact '{updated_contact.get_full_name()}' updated successfully.")
+
+            except ContactNotFoundError as e:
+                print(e)
+
         elif cmd == "delete":
-            ...
+            query = input("Search contact: ")
+            contact_found = get_contact(query, addressbook)
+
+            render_contacts([contact_found])
+            choice = input(
+                f"\nAre you sure to remove '{contact_found.get_full_name()}'? [y/N]: "
+            )
+
+            if choice.strip().lower() not in ["", "y", "n"]:
+                print("Invalid choice.")
+                continue
+
+            if choice == "y":
+                try:
+                    addressbook.delete_contact(contact_found)
+                except KeyError as e:
+                    print(e)
+                    continue
+
+                print(
+                    f"\nContact '{contact_found.get_full_name()}' removed successfully."
+                )
+
         elif cmd == "save":
             path = input("Path to save JSON: ").strip()
             addressbook.save(path)
             print(f"Saved to '{path}'.")
 
             break
+
         elif cmd == "exit":
             if addressbook.is_changed:
                 answer = (
@@ -93,6 +163,11 @@ exit: exit from the application
                     .strip()
                     .lower()
                 )
+
+                if answer.strip().lower() not in ["", "y", "n"]:
+                    print("Invalid choice.")
+                    continue
+
                 if answer == "y":
                     path = input("Path to save JSON: ").strip()
                     addressbook.save(path)

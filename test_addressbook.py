@@ -1,5 +1,5 @@
 import unittest
-from storage import Storage, JsonStorage
+from storage import JsonStorage
 from contacts import Contact
 from addressbook import AddressBook
 from contact_exceptions import DuplicateContactError, ContactNotFoundError
@@ -56,8 +56,8 @@ class TestAddressBook(unittest.TestCase):
         )
 
         # test if id stays consistent after update
-        # check if associated to the old id there is the contact updated 
-        # key id (self.contact.id) -> updated_contact: Contact 
+        # check if associated to the old id there is the contact updated
+        # key id (self.contact.id) -> updated_contact: Contact
         self.assertIs(self.addressbook.contacts[self.contact.id], updated_contact)
 
     def test_check_duplicate_phone(self):

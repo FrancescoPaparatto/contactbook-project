@@ -1,5 +1,8 @@
 import re
+from addressbook import AddressBook
+from contacts import Contact
 from contact_exceptions import (
+    ContactNotFoundError,
     InvalidEmailError,
     InvalidPhoneError,
     MissingRequiredFieldError,
@@ -9,11 +12,13 @@ EMAIL_PATTERN = r"^[\w\.]+@([\w]+\.)+[\w]{2,3}$"
 PHONE_NUMBER_PATTERN = r"^(?:\+39\s?)?3\d{2}\s?\d{3}\s?\d{4}$"
 PREFIX = "+39"
 
+# TODO: In the MissingRequiredFieldError I could add a field_name parameter in order to have something to print out and be specific, I have to understand how I should add it 
+
 
 def validate_name(name: str) -> str:
     if not name:
-        raise MissingRequiredFieldError("Missing required field: ")
-    return name.strip().capitalize()
+        raise MissingRequiredFieldError("Missing required field")
+    return name.strip().title()
 
 
 def validate_phone_number(phone_number: str) -> str:
@@ -42,26 +47,16 @@ def validate_email(email: str | None) -> str | None:
 
     return email
 
-def ask_first_name() -> str:
+
+def ask_name(prompt: str) -> str:
     while True:
         try:
-            first_name = validate_name(input("First name (required): "))
+            name = validate_name(input(prompt))
         except MissingRequiredFieldError as e:
-            print(f"{e} 'First name'")
+            print(e)
             continue
 
-        return first_name
-
-
-def ask_last_name() -> str:
-    while True:
-        try:
-            last_name = validate_name(input("Last name (required): "))
-        except MissingRequiredFieldError as e:
-            print(f"{e} 'Last name'.")
-            continue
-
-        return last_name
+        return name
 
 
 def ask_phone_number() -> str:
@@ -94,8 +89,8 @@ def ask_email() -> str | None:
 
 def prompt_contact_fields() -> dict:
     while True:
-        first_name = ask_first_name()
-        last_name = ask_last_name()
+        first_name = ask_name("First name (required): ")
+        last_name = ask_name("Last name (required): ")
         phone_number = ask_phone_number()
         email = ask_email()
 
@@ -119,3 +114,24 @@ def render_contacts(contacts):
         print(
             f"{(contact.last_name):15}  {(contact.first_name):15}  {render_phone_number:17}  {contact.email or ''}"
         )
+
+
+def get_contact(query: str, addressbook: AddressBook) -> Contact:
+    while True:
+        try:
+            contact_found = addressbook.search_contact(query)
+            if len(contact_found) == 1:
+                return contact_found[0]
+
+            elif len(contact_found) > 1:
+                print("\nMultiple contacts found:")
+
+                render_contacts(contact_found)
+                print("\nThe query is too generic, refine it:")
+                query = input("New search: ")
+
+                return addressbook.search_contact(query)[0]
+
+        except ContactNotFoundError:
+            print("No contacts found. Try again.")
+            query = input("\nSearch contact: ")

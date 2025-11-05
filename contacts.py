@@ -11,6 +11,7 @@ class Contact:
     id: str = field(default_factory=lambda: str(uuid4()))
     email: Optional[str] = None
 
+
     def get_full_name(self) -> str:
         return f"{self.first_name.capitalize()} {self.last_name.capitalize()}"
 
@@ -26,6 +27,7 @@ class Contact:
     @staticmethod
     def from_dict(d: dict) -> "Contact":
         return Contact(
+            id=d["id"],
             first_name=d["first_name"],
             last_name=d["last_name"],
             phone_number=d["phone"],

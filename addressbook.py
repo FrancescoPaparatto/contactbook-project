@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 from contacts import Contact
 from contact_exceptions import DuplicateContactError, ContactNotFoundError
-from storage import JsonStorage, Storage
+from storage import Storage
 
 # TODO: update test_addressbook.py because now addressbook accept storage object as argument
 
@@ -17,7 +17,7 @@ class AddressBook:
         # Flag used to keep track of the changes
         self.is_changed = False
 
-    def add_contact(self, contact: Contact) -> Contact:
+    def add_contact(self, contact: Contact) -> None:
         self._check_duplicate_contact(contact)
 
         self.contacts[contact.id] = contact
@@ -28,19 +28,16 @@ class AddressBook:
 
         self.is_changed = True
 
-        # return the contact object in order to make easier to show the user changes
-        return contact
-
     def delete_contact(self, contact: Contact) -> None:
         deleted_contact = self.contacts.pop(contact.id, None)
 
         if deleted_contact is None:
-            raise ContactNotFoundError("Contact not found.")
+            raise ContactNotFoundError("Contact not found")
+
 
         # Remove it also from second indexes dictionaries
         self._phone_idx.pop(contact.phone_number, None)
 
-        # TODO: UNDERSTAND the case of a contact without email of a modified contact
         if contact.email:
             self._email_idx.pop(contact.email, None)
 
@@ -48,17 +45,13 @@ class AddressBook:
 
     def update_contact(
         self, contact_to_update: Contact, updated_contact: Contact
-    ) -> Contact:
-
+    ) -> None:
         if contact_to_update.id not in self.contacts:
-            print(contact_to_update)
             raise ContactNotFoundError("Contact not found.")
 
         self._check_duplicate_contact(updated_contact, exclude_id=contact_to_update.id)
         self._replace_contact(contact_to_update, updated_contact)
         self.is_changed = True
-
-        return updated_contact
 
     def list_contacts(self) -> List[Contact]:
         return [
@@ -76,10 +69,7 @@ class AddressBook:
         contacts_found = []
         # The user can search contact by first or last name typing them entirely or typing  sub-string
         for contact in self.contacts.values():
-            if (
-                normalized_query in contact.first_name.lower()
-                or normalized_query in contact.last_name.lower()
-            ):
+            if normalized_query in contact.get_full_name().lower():
                 contacts_found.append(contact)
 
         if not contacts_found:
@@ -121,13 +111,6 @@ class AddressBook:
 
         return new_contact
 
-    # TODO: understand if I need this function, else eliminate it
-    def get_contact(self, contact: Contact) -> Contact:
-        if contact not in self.contacts.values():
-            raise ContactNotFoundError("Contact not found.")
-
-        return contact
-
     def save(self, path: str):
         # serialize data from json to a Dict[str, dict]
         data = {contact.id: contact.to_dict() for contact in self.contacts.values()}
@@ -162,5 +145,3 @@ class AddressBook:
 
     def __len__(self):
         return len(self.contacts)
-
-

@@ -11,13 +11,11 @@ from contact_exceptions import StorageError, FileCorruptionError
 
 
 class Storage(Protocol):
-    # TODO: add type hints for return values
     def save(self, data: Dict[str, dict], path: str): ...
     def load(self, path: str) -> Dict[str, dict]: ...
 
 
 class JsonStorage:
-    # I need to understand if a dict[str, dict] is the best way to do that
     def save(self, data: Dict[str, dict], path: str) -> None:
         if not path:
             raise StorageError("Save path is empty.")
@@ -41,8 +39,15 @@ class JsonStorage:
         if not path or not os.path.exists(path):
             raise StorageError(f"File '{path}' not found.")
 
-        with open(path, "r") as contacts_file:
-            data = json.load(contacts_file)
+        if os.path.getsize(path) == 0:
+            return {}
+            
+        try:
+            with open(path, "r") as contacts_file:
+                data = json.load(contacts_file)
+
+        except json.JSONDecodeError as e:
+            raise FileCorruptionError("Invalid JSON file.") from e
 
         if not isinstance(data, Dict):
             raise FileCorruptionError("Invalid format, expected a dict of contacts")
