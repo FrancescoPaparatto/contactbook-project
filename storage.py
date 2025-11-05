@@ -49,7 +49,7 @@ class JsonStorage:
         except json.JSONDecodeError as e:
             raise FileCorruptionError("Invalid JSON file.") from e
 
-        if not isinstance(data, Dict):
+        if not isinstance(data, dict):
             raise FileCorruptionError("Invalid format, expected a dict of contacts")
 
         return data

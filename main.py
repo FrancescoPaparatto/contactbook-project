@@ -3,12 +3,11 @@ from os import name, system
 from contacts import Contact
 from addressbook import AddressBook
 from storage import Storage, JsonStorage
+from contact_validators import validate_phone_number, validate_email
 from helpers import (
     prompt_contact_fields,
     render_contacts,
     get_contact,
-    validate_email,
-    validate_phone_number,
 )
 from contact_exceptions import (
     ContactValidationError,
