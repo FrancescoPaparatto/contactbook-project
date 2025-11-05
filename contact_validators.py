@@ -23,7 +23,7 @@ def validate_phone_number(phone_number: str) -> str:
     if not phone_number:
         raise MissingRequiredFieldError("Phone is require")
 
-    if not re.match(PHONE_NUMBER_PATTERN, phone_number):
+    if not re.match(PHONE_NUMBER_PATTERN, phone_number.strip()):
         raise InvalidPhoneError(
             "Invalid phone: phone must contain only digits with optional leading + (e.g. +393491234567)"
         )
