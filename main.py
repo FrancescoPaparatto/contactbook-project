@@ -166,7 +166,11 @@ exit: exit from the application
 
         elif cmd == "delete":
             query = input("Search contact: ")
+
             contact_found = get_contact(query, addressbook)
+
+            if contact_found is None:
+                continue
 
             render_contacts([contact_found])
             choice = input(
