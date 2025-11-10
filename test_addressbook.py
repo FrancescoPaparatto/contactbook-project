@@ -1,5 +1,4 @@
 import unittest
-import addressbook
 from storage import JsonStorage
 from contacts import Contact
 from addressbook import AddressBook

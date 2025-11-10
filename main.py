@@ -104,12 +104,19 @@ exit: exit from the application
             query = input("\nSearch contact: ")
             contact_found = get_contact(query, addressbook)
 
+            if contact_found is None:
+                continue
+
             render_contacts([contact_found])
 
         elif cmd == "edit":
             query = input("Select the contact you want to edit: ")
 
             contact_to_update = get_contact(query, addressbook)
+
+            if contact_to_update is None:
+                continue
+
             print("\nCurrent contact informations:")
             print(f"First: {contact_to_update.first_name}")
             print(f"Last:  {contact_to_update.last_name}")

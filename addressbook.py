@@ -5,7 +5,6 @@ from storage import Storage
 
 # TODO: update test_addressbook.py because now addressbook accept storage object as argument
 
-
 class AddressBook:
     def __init__(self, storage: Storage):
         self.contacts: Dict[str, Contact] = {}

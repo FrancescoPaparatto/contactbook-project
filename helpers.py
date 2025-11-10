@@ -77,7 +77,7 @@ def render_contacts(contacts):
         )
 
 
-def get_contact(query: str, addressbook: AddressBook) -> Contact:
+def get_contact(query: str, addressbook: AddressBook) -> Contact | None:
     while True:
         try:
             contact_found = addressbook.search_contact(query)
@@ -91,8 +91,18 @@ def get_contact(query: str, addressbook: AddressBook) -> Contact:
                 print("\nThe query is too generic, refine it:")
                 query = input("New search: ")
 
+                if not query:
+                    continue
                 return addressbook.search_contact(query)[0]
 
+
         except ContactNotFoundError:
-            print("No contacts found. Try again.")
+            print("No contacts found.")
+            choice = input("Try again? (y/N): ").strip().lower()
+            if choice != 'y':
+                return None  # Allow exit
+
             query = input("\nSearch contact: ")
+
+
+
