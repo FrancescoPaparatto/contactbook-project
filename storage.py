@@ -32,9 +32,7 @@ class JsonStorage:
         except Exception as e:
             raise StorageError(f"Could not save the file to'{path}': {e}") from e
 
-    # TODO: add additional checks like if the json is empty or something like that, try to handle as much cases as possible
-    # TODO: read the last answer of chat GPT and understand the risk of that function
-    # TODO: check the return value of json.load
+
     def load(self, path: str) -> Dict[str, dict]:
         if not path or not os.path.exists(path):
             raise StorageError(f"File '{path}' not found.")
