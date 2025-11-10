@@ -1,8 +1,3 @@
-# now I will understand how to structure the code
-# the idea is:
-# - first implement the simplest version of the program
-# - then improve it by adding some checks
-# - then looks for data integrity and security
 
 import os
 import json
